@@ -37,10 +37,27 @@ root.dataset.theme = theme;
 // Режим «веб-приложение» (с экрана «Домой»): растягиваем слои на всю высоту экрана,
 // включая нижнюю безопасную зону, которую iOS иногда не включает в высоту окна.
 const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+// Высота, которую iOS считает «экраном»: берём максимум из окна, единиц vh и размеров экрана.
+function viewportInfo() {
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;left:0;top:0;width:1px;visibility:hidden;pointer-events:none;';
+  document.body.appendChild(probe);
+  const heights = [];
+  for (const unit of ['100vh', '100lvh', '100dvh']) {   // неподдерживаемая единица просто игнорируется
+    probe.style.height = unit;
+    heights.push(probe.offsetHeight);
+  }
+  probe.style.height = '0';
+  probe.style.paddingBottom = 'env(safe-area-inset-bottom, 0px)';
+  const insetBottom = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+  probe.remove();
+  return { vh: Math.max(...heights), insetBottom };
+}
 function updateAppHeight() {
   const landscape = window.innerWidth > window.innerHeight;
   const full = landscape ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
-  root.style.setProperty('--app-h', Math.max(window.innerHeight, full) + 'px');
+  const { vh } = viewportInfo();
+  root.style.setProperty('--app-h', Math.max(window.innerHeight, vh, full) + 'px');
 }
 if (isStandalone) {
   root.classList.add('standalone');
@@ -137,6 +154,7 @@ if (params.get('debug') === '1') {
     `week:  ${weekSequence(w).join(' > ')}`,
     `win:   ${window.innerWidth}x${window.innerHeight}  screen: ${screen.width}x${screen.height}`,
     `standalone: ${isStandalone}  app-h: ${root.style.getPropertyValue('--app-h') || '-'}`,
+    `vh: ${viewportInfo().vh}  safe-bottom: ${viewportInfo().insetBottom}`,
     `day:   ${(day - BASE_DAY_INDEX) % 7 < 0 ? ((day - BASE_DAY_INDEX) % 7) + 7 : (day - BASE_DAY_INDEX) % 7} (0 = пн)`,
   ].join('\n');
   document.body.appendChild(box);

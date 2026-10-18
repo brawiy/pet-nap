@@ -1,9 +1,9 @@
-const CACHE = 'pet-nap-v3';
+const CACHE = 'pet-nap-v4';
 const ASSETS = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
   'src/app.js', 'src/logic.js',
   'assets/bg-light.png', 'assets/bg-dark.png',
-  'assets/logo-light.png', 'assets/logo-dark.png',
+  'assets/logo-light.svg', 'assets/logo-dark.svg',
   'assets/pet-goose.png', 'assets/pet-mouse.png', 'assets/pet-capy.png',
   'assets/icons/apple-touch-icon.png', 'assets/icons/icon-192.png', 'assets/icons/icon-512.png',
 ];
