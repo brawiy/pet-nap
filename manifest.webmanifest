@@ -1,0 +1,14 @@
+{
+  "name": "Pet Nap",
+  "short_name": "Pet Nap",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#383c3d",
+  "theme_color": "#383c3d",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

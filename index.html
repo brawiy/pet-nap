@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Pet Nap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pet Nap">
+  <meta name="theme-color" content="#383c3d">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
+  <link rel="preload" as="image" href="assets/bg-light.png">
+  <link rel="preload" as="image" href="assets/bg-dark.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+
+  <div class="pet" id="pet" aria-hidden="true">
+    <img alt="" draggable="false">
+  </div>
+
+  <div class="splash" id="splash" aria-label="Pet Nap">
+    <img class="logo logo--dark" src="assets/logo-dark.png" alt="Pet Nap" draggable="false">
+    <img class="logo logo--light" src="assets/logo-light.png" alt="Pet Nap" draggable="false">
+  </div>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
