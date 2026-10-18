@@ -20,14 +20,16 @@ html, body {
 html[data-theme="light"], html[data-theme="light"] body { background: #cdccdc; }
 html[data-theme="dark"],  html[data-theme="dark"]  body { background: #242427; }
 
-/* В режиме «веб-приложение» iOS иногда считает высоту окна без нижней безопасной зоны
-   (полоса у Home Indicator). Тогда JS кладёт реальную высоту экрана в --app-h. */
-html.standalone .bg,
-html.standalone .pet,
-html.standalone .splash {
-  bottom: auto;
-  height: var(--app-h, 100%);
+/* iOS 26 (баг WebKit 301108): в приложении с экрана «Домой» при black-translucent + viewport-fit=cover
+   окно получается короче экрана на высоту статус-бара, снизу остаётся полоса.
+   Лечение (проверено авторами frappe-ui в симуляторе iOS 26.2): сделать html не ниже экрана.
+   Тогда iOS выдаёт странице полный экран, а fixed-слои сами доходят до низа. */
+html.standalone {
+  min-height: calc(100% + env(safe-area-inset-top, 0px));              /* запасной вариант */
+  min-height: min(100lvh, calc(100% + env(safe-area-inset-top, 0px))); /* iOS 15.4+ */
+  overflow: visible;
 }
+html.standalone body { overflow: visible; }
 
 /* пока JS не определил тему — ничего не показываем (нет мигания не той темой) */
 html:not([data-theme]) body { visibility: hidden; }

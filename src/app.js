@@ -34,38 +34,21 @@ const pet = PETS.includes(petParam) ? petParam : petForDate(now);
 // Тема определяется один раз при запуске и дальше не меняется.
 root.dataset.theme = theme;
 
-// Режим «веб-приложение» (с экрана «Домой»): растягиваем слои на всю высоту экрана,
-// включая нижнюю безопасную зону, которую iOS иногда не включает в высоту окна.
+// Режим «веб-приложение» (с экрана «Домой»): включает обход бага iOS 26 с полосой снизу (см. styles.css).
 const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-// Высота, которую iOS считает «экраном»: берём максимум из окна, единиц vh и размеров экрана.
+if (isStandalone) root.classList.add('standalone');
+
+// Для ?debug=1: что реально видит страница
 function viewportInfo() {
   const probe = document.createElement('div');
-  probe.style.cssText = 'position:fixed;left:0;top:0;width:1px;visibility:hidden;pointer-events:none;';
+  probe.style.cssText = 'position:fixed;left:0;top:0;width:1px;visibility:hidden;pointer-events:none;height:100vh;height:100lvh;' +
+    'padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:content-box;';
   document.body.appendChild(probe);
-  const heights = [];
-  for (const unit of ['100vh', '100lvh', '100dvh']) {   // неподдерживаемая единица просто игнорируется
-    probe.style.height = unit;
-    heights.push(probe.offsetHeight);
-  }
-  probe.style.height = '0';
-  probe.style.paddingBottom = 'env(safe-area-inset-bottom, 0px)';
-  const insetBottom = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+  const cs = getComputedStyle(probe);
+  const info = { lvh: Math.round(parseFloat(cs.height)), top: parseFloat(cs.paddingTop) || 0, bottom: parseFloat(cs.paddingBottom) || 0 };
   probe.remove();
-  return { vh: Math.max(...heights), insetBottom };
+  return info;
 }
-function updateAppHeight() {
-  const landscape = window.innerWidth > window.innerHeight;
-  const full = landscape ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
-  const { vh } = viewportInfo();
-  root.style.setProperty('--app-h', Math.max(window.innerHeight, vh, full) + 'px');
-}
-if (isStandalone) {
-  root.classList.add('standalone');
-  updateAppHeight();
-  window.addEventListener('resize', updateAppHeight);
-  window.addEventListener('orientationchange', updateAppHeight);
-}
-document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#2a2b2e' : '#dcdde6');
 
 const petLayer = document.getElementById('pet');
 const petImg = petLayer.querySelector('img');
@@ -145,19 +128,26 @@ document.addEventListener('keydown', (e) => {
 if (params.get('debug') === '1') {
   const day = effectiveDayIndex(now);
   const w = Math.floor((day - BASE_DAY_INDEX) / 7);
+  const dow = (((day - BASE_DAY_INDEX) % 7) + 7) % 7;
   const box = document.createElement('div');
   box.className = 'debug';
-  box.textContent = [
-    `now:   ${now.toString().slice(0, 24)}`,
-    `theme: ${theme}`,
-    `pet:   ${pet}`,
-    `week:  ${weekSequence(w).join(' > ')}`,
-    `win:   ${window.innerWidth}x${window.innerHeight}  screen: ${screen.width}x${screen.height}`,
-    `standalone: ${isStandalone}  app-h: ${root.style.getPropertyValue('--app-h') || '-'}`,
-    `vh: ${viewportInfo().vh}  safe-bottom: ${viewportInfo().insetBottom}`,
-    `day:   ${(day - BASE_DAY_INDEX) % 7 < 0 ? ((day - BASE_DAY_INDEX) % 7) + 7 : (day - BASE_DAY_INDEX) % 7} (0 = пн)`,
-  ].join('\n');
+  const render = () => {
+    const v = viewportInfo();
+    box.textContent = [
+      `now:   ${now.toString().slice(0, 24)}`,
+      `theme: ${theme}`,
+      `pet:   ${pet}`,
+      `week:  ${weekSequence(w).join(' > ')}  (day ${dow}, 0 = пн)`,
+      `win:   ${window.innerWidth}x${window.innerHeight}   screen: ${screen.width}x${screen.height}`,
+      `html:  ${document.documentElement.offsetHeight}   lvh: ${v.lvh}`,
+      `safe:  top ${v.top}  bottom ${v.bottom}`,
+      `standalone: ${isStandalone}`,
+    ].join('\n');
+  };
   document.body.appendChild(box);
+  render();
+  window.addEventListener('resize', render);
+  setTimeout(render, 1500);
 }
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {

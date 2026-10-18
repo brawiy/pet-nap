@@ -1,4 +1,4 @@
-const CACHE = 'pet-nap-v4';
+const CACHE = 'pet-nap-v5';
 const ASSETS = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
   'src/app.js', 'src/logic.js',
