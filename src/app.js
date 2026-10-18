@@ -33,6 +33,21 @@ const pet = PETS.includes(petParam) ? petParam : petForDate(now);
 
 // Тема определяется один раз при запуске и дальше не меняется.
 root.dataset.theme = theme;
+
+// Режим «веб-приложение» (с экрана «Домой»): растягиваем слои на всю высоту экрана,
+// включая нижнюю безопасную зону, которую iOS иногда не включает в высоту окна.
+const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+function updateAppHeight() {
+  const landscape = window.innerWidth > window.innerHeight;
+  const full = landscape ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
+  root.style.setProperty('--app-h', Math.max(window.innerHeight, full) + 'px');
+}
+if (isStandalone) {
+  root.classList.add('standalone');
+  updateAppHeight();
+  window.addEventListener('resize', updateAppHeight);
+  window.addEventListener('orientationchange', updateAppHeight);
+}
 document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#2a2b2e' : '#dcdde6');
 
 const petLayer = document.getElementById('pet');
@@ -120,6 +135,8 @@ if (params.get('debug') === '1') {
     `theme: ${theme}`,
     `pet:   ${pet}`,
     `week:  ${weekSequence(w).join(' > ')}`,
+    `win:   ${window.innerWidth}x${window.innerHeight}  screen: ${screen.width}x${screen.height}`,
+    `standalone: ${isStandalone}  app-h: ${root.style.getPropertyValue('--app-h') || '-'}`,
     `day:   ${(day - BASE_DAY_INDEX) % 7 < 0 ? ((day - BASE_DAY_INDEX) % 7) + 7 : (day - BASE_DAY_INDEX) % 7} (0 = пн)`,
   ].join('\n');
   document.body.appendChild(box);

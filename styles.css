@@ -16,8 +16,18 @@ html, body {
   touch-action: none;
   background: #383c3d;
 }
+/* цвет под слоями = цвет низа градиента, чтобы любой зазор не был заметен */
+html[data-theme="light"], html[data-theme="light"] body { background: #cdccdc; }
+html[data-theme="dark"],  html[data-theme="dark"]  body { background: #242427; }
 
-body { position: fixed; inset: 0; }
+/* В режиме «веб-приложение» iOS иногда считает высоту окна без нижней безопасной зоны
+   (полоса у Home Indicator). Тогда JS кладёт реальную высоту экрана в --app-h. */
+html.standalone .bg,
+html.standalone .pet,
+html.standalone .splash {
+  bottom: auto;
+  height: var(--app-h, 100%);
+}
 
 /* пока JS не определил тему — ничего не показываем (нет мигания не той темой) */
 html:not([data-theme]) body { visibility: hidden; }
